@@ -7,7 +7,8 @@ import {
     eachDayOfInterval,
     isSameMonth,
     isBefore,
-    endOfDay
+    endOfDay,
+    isToday
 } from "date-fns"
 import { formatDate } from "../utils/formatDate"
 import { cc } from "../utils/cc"
@@ -63,7 +64,7 @@ function CalendarDay({ day, showWeekName, selectedMonth }: CalendarDayProps) {
                 {showWeekName && <div className="week-name">{formatDate(day, {
                     weekday: "short"
                 })}</div>}
-                <div className="day-number">
+                <div className={cc("day-number", isToday(day) && "today")}>
                     {formatDate(day, { day: "numeric" })}
                 </div>
                 <button className="add-event-btn">+</button>
