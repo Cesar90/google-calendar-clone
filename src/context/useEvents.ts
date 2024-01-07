@@ -8,5 +8,5 @@ export function useEvents() {
     if (value == null) {
         throw new Error("useEvents must be used within an EventsProvider")
     }
-    return CSSStyleValue
+    return value
 }
