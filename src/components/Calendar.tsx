@@ -1,6 +1,16 @@
 import { useState, useMemo } from "react"
-import { startOfWeek, startOfMonth, endOfWeek, endOfMonth, eachDayOfInterval } from "date-fns"
+import {
+    startOfWeek,
+    startOfMonth,
+    endOfWeek,
+    endOfMonth,
+    eachDayOfInterval,
+    isSameMonth,
+    isBefore,
+    endOfDay
+} from "date-fns"
 import { formatDate } from "../utils/formatDate"
+import { cc } from "../utils/cc"
 
 export function Calendar() {
     const [selectedMonth, setSelectedMonth] = useState(new Date())
@@ -42,7 +52,13 @@ type CalendarDayProps = {
 
 function CalendarDay({ day, showWeekName, selectedMonth }: CalendarDayProps) {
     return (
-        <div className="day non-month-day old-month-day">
+        // <div className="day non-month-day old-month-day">
+        <div className={cc(
+            "day",
+            !isSameMonth(day, selectedMonth) && "non-month-day",
+            isBefore(endOfDay(day), new Date()) && "old-month-day"
+        )}
+        >
             <div className="day-header">
                 {showWeekName && <div className="week-name">{formatDate(day, {
                     weekday: "short"
