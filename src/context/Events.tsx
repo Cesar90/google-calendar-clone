@@ -2,7 +2,7 @@ import { ReactNode, createContext, useState } from "react"
 import { UnionOmit } from "../utils/type"
 import { EVENT_COLORS } from "./useEvents"
 
-type Event = {
+export type Event = {
     id: string
     name: string
     color: (typeof EVENT_COLORS)[number]

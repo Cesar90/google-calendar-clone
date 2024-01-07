@@ -17,6 +17,7 @@ import { cc } from "../utils/cc"
 import { useEvents } from "../context/useEvents"
 import { Modal, ModalProps } from "./Modal"
 import { UnionOmit } from "../utils/type"
+import { Event } from "../context/Events"
 
 export function Calendar() {
     const [selectedMonth, setSelectedMonth] = useState(new Date())
@@ -124,7 +125,7 @@ function CalendarDay({ day, showWeekName, selectedMonth }: CalendarDayProps) {
                 date={day}
                 isOpen={isNewEventModalOpen}
                 onClose={() => setIsNewEventModalOpen(false)}
-                onSubmit={() => null}
+                onSubmit={addEvent}
             />
         </div>
     )
@@ -137,12 +138,24 @@ type EventFormModalProps = {
         | { onDelete?: never; event?: never; date: Date }
     ) & Omit<ModalProps, "children">
 
-function EventFormModal({ onSubmit, onDelete, event, date, ...modalProps }: EventFormModalProps) {
+function EventFormModal({
+    onSubmit,
+    onDelete,
+    event,
+    date,
+    ...modalProps }: EventFormModalProps) {
+    const isNew = event == null
+
     return (<Modal {...modalProps}>
         <div className="modal-title">
-            <div>Add Event</div>
-            <small>6/8/23</small>
-            <button className="close-btn">&times;</button>
+            <div>{isNew ? "Add" : "Edit"} Event</div>
+            <small>{formatDate(date || event.date, { dateStyle: "short" })}</small>
+            <button
+                className="close-btn"
+                onClick={modalProps.onClose}
+            >
+                &times;
+            </button>
         </div>
         <form>
             <div className="form-group">
