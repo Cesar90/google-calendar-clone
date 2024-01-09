@@ -10,7 +10,9 @@ import {
     endOfDay,
     isToday,
     subMonths,
-    addMonths
+    addMonths,
+    isSameDay,
+    parse
 } from "date-fns"
 import { formatDate } from "../utils/formatDate"
 import { cc } from "../utils/cc"
@@ -28,6 +30,7 @@ export function Calendar() {
         return eachDayOfInterval({ start: firstWeekStart, end: lastWeekEnd })
     }, [selectedMonth])
 
+    const { events } = useEvents()
     // console.log(calendarDays)
 
     return <div className="calendar">
@@ -67,6 +70,7 @@ export function Calendar() {
                 <CalendarDay
                     key={day.getTime()}
                     day={day}
+                    events={events.filter(event => isSameDay(day, event.date))}
                     showWeekName={index < 7}
                     selectedMonth={selectedMonth} />
             ))}
@@ -78,11 +82,34 @@ type CalendarDayProps = {
     day: Date
     showWeekName: boolean
     selectedMonth: Date
+    events: Event[]
 }
 
-function CalendarDay({ day, showWeekName, selectedMonth }: CalendarDayProps) {
+function CalendarDay({
+    day,
+    showWeekName,
+    selectedMonth,
+    events
+}: CalendarDayProps) {
+
     const [isNewEventModalOpen, setIsNewEventModalOpen] = useState(false)
     const { addEvent } = useEvents()
+
+    const sortedEvents = useMemo(() => {
+        const timeToNumber = (time: string) => parseFloat(time.replace(":", "."));
+
+        return [...events].sort((a, b) => {
+            if (a.allDay && b.allDay) {
+                return 0
+            } else if (a.allDay) {
+                return -1
+            } else if (b.allDay) {
+                return 1
+            } else {
+                return timeToNumber(a.startTime) - timeToNumber(b.startTime)
+            }
+        })
+    }, [events])
 
     return (
         // <div className="day non-month-day old-month-day">
@@ -106,21 +133,13 @@ function CalendarDay({ day, showWeekName, selectedMonth }: CalendarDayProps) {
                     +
                 </button>
             </div>
-            {/* <div className="events">
-                <button className="all-day-event blue event">
-                    <div className="event-name">Short</div>
-                </button>
-                <button className="all-day-event green event">
-                    <div className="event-name">
-                        Long Event Name That Just Keeps Going
-                    </div>
-                </button>
-                <button className="event">
-                    <div className="color-dot blue"></div>
-                    <div className="event-time">7am</div>
-                    <div className="event-name">Event Name</div>
-                </button>
-            </div> */}
+            {sortedEvents.length > 0 && (
+                <div className="events">
+                    {sortedEvents.map(event => (
+                        <CalendarEvent key={event.id} event={event} />
+                    ))}
+                </div>
+            )}
             <EventFormModal
                 date={day}
                 isOpen={isNewEventModalOpen}
@@ -128,6 +147,27 @@ function CalendarDay({ day, showWeekName, selectedMonth }: CalendarDayProps) {
                 onSubmit={addEvent}
             />
         </div>
+    )
+}
+
+function CalendarEvent({ event }: { event: Event }) {
+    return (
+        <button className={cc("event", event.color, event.allDay && "all-day-event")}>
+            {event.allDay ? (
+                <div className="event-name">{event.name}</div>
+            ) : (
+                <>
+                    <div className={`color-dot ${event.color}`}></div>
+                    <div className="event-time">
+                        {formatDate(parse(event.startTime, "HH:mm", event.date), {
+                            timeStyle: "short"
+                        })}
+                    </div>
+                    <div className="event-name">{event.name}</div>
+                </>
+            )}
+
+        </button>
     )
 }
 
@@ -220,7 +260,7 @@ function EventFormModal({
                 &times;
             </button>
         </div>
-        <form>
+        <form onSubmit={handleSubmit}>
             <div className="form-group">
                 <label htmlFor={`${formId}-name`}>Name</label>
                 <input
