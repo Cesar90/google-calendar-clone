@@ -182,6 +182,7 @@ function EventFormModal({
         }
 
         let newEvent: UnionOmit<Event, "id">
+
         if (isAllDayChecked) {
             newEvent = {
                 ...commonProps,
@@ -203,6 +204,9 @@ function EventFormModal({
                 endTime
             }
         }
+
+        modalProps.onClose()
+        onSubmit(newEvent)
     }
 
     return (<Modal {...modalProps}>
@@ -300,13 +304,11 @@ function EventFormModal({
                 </div>
             </div>
             <div className="row">
-                {onDelete != null &&
-                    <button
-                        className="btn btn-success"
-                        type="submit">
-                        {isNew ? "Add" : "Edit"}
-                    </button>
-                }
+                <button
+                    className="btn btn-success"
+                    type="submit">
+                    {isNew ? "Add" : "Edit"}
+                </button>
                 {onDelete != null &&
                     <button
                         className="btn btn-delete"
